@@ -48,9 +48,10 @@
             if (w2ui["grid"] == null) {
                 $('#DivGrid').w2grid({
                     name: 'grid',
+                    selectType : 'cell',
                     columns: [
-                        { field: 'recid', caption: 'ID', size: '20%', editable: false },
-                        { field: 'send', caption: 'text', size: '80%', editable: { type: 'text' }, style: "text-align: left;" },
+                        { field: 'recid', text: '(段階,分割)', size: '20%', editable: false },
+                        { field: 'send', text: '送信値', size: '80%', editable: { type: 'text' }, style: "text-align: left;" },
                     ]
                 });
             }
