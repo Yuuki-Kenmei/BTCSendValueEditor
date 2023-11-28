@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BTC送信値用QRコード生成</title>
+
+    <script type="text/javascript" src="js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.qrcode.min.js"></script>
+    <script type="text/javascript" src="js/w2ui-2.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/w2ui-2.0.min.css" />
+    <script type="text/javascript">
+
+        function genarateQR() {
+
+            var qrStr = "";
+            var errFlg = false;
+
+            var step = document.getElementById("step").value;
+            var split = document.getElementById("split").value;
+
+            if (document.getElementById("rdoStick").checked) {
+                qrStr = "s" + "|" + step.toString() + "|" + split.toString();
+            }
+            else {
+                qrStr = "l" + "|" + step.toString();
+            }
+            for (var i = 0; i < w2ui["grid"].records.length; i++) {
+                var str = w2ui["grid"].getCellValue(i, 1);
+                if (str.includes("|")) {
+                    errFlg = true;
+                    break;
+                }
+                qrStr += "|" + str;
+            }
+
+            if (errFlg) {
+                alert("パイプ（\"|\"）は使用できません。");
+            }
+            else {
+                $('#divQRcode').html('<div></div>');
+                $('#divQRcode').qrcode(qrStr);
+            }
+            
+        }
+
+        function initGrid() {
+            if (w2ui["grid"] == null) {
+                $('#DivGrid').w2grid({
+                    name: 'grid',
+                    columns: [
+                        { field: 'recid', caption: 'ID', size: '20%', editable: false },
+                        { field: 'send', caption: 'text', size: '80%', editable: { type: 'text' }, style: "text-align: left;" },
+                    ]
+                });
+            }
+            w2ui["grid"].clear();
+            var step = document.getElementById("step").value;
+            var split = document.getElementById("split").value;
+
+            if (document.getElementById("rdoStick").checked) {
+                var height = 75 + step * split * 32;
+                if (height > 520) {
+                    height = 520;
+                }
+                document.getElementById("DivGrid").style.height = height.toString() + "px";
+                w2ui["grid"].add({ recid: '(0,0)', send: '' });
+                for (var i = 1; i <= step; i++) {
+                    for (var j = 0; j < split; j++) {
+                        w2ui["grid"].add({ recid: "(" + i.toString() + "," + j.toString() + ")", send: '' });
+                    }
+                }
+            }
+            else {
+                var height = 75 + step * 32;
+                if (height > 520) {
+                    height = 520;
+                }
+                document.getElementById("DivGrid").style.height = height.toString() + "px";
+                w2ui["grid"].add({ recid: '(0)', send: '' });
+                for (var i = 1; i <= step; i++) {
+                    w2ui["grid"].add({ recid: "(" + i.toString() + ")", send: '' });
+                }
+            }
+
+            $('#divQRcode').html('<div></div>');
+        }
+
+        function changeControl() {
+            if (document.getElementById("rdoStick").checked) {
+                document.getElementById("split").disabled = false;
+            }
+            else {
+                document.getElementById("split").disabled = true;
+            }
+            initGrid();
+        }
+
+        function changeStepSplit() {
+            initGrid();
+        }
+
+        function openExplain() {
+            if (document.getElementById("rdoStick").checked) {
+                window.open("sub/explain.html?p=s");
+            }
+            else {
+                window.open("sub/explain.html?p=l");
+            }
+
+        }
+
+        window.onload = function () {
+            initGrid();
+        };
+
+    </script>
+</head>
+
+<body>
+
+    <div>
+        <table width="100%">
+            <tr>
+                <td>
+                    <lebel><input type="radio" id="rdoStick" name="control" checked="true"
+                            onchange="changeControl()">スティック</lebel>
+                    <lebel><input type="radio" id="rdoLever" name="control" onchange="changeControl()">レバー</lebel>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 100px;">
+                    <label>段階数</label>
+                    <select id="step" style="width: 80px;" onchange="changeStepSplit()">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>分割数</label>
+                    <select id="split" style="width: 80px;" onchange="changeStepSplit()">
+                        <option>4</option>
+                        <option>8</option>
+                        <option>12</option>
+                        <option>16</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="buttonExplain" value="位置解説" style="margin-left: 430px;"
+                        onclick="openExplain()" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="DivGrid" style="width: 500px; height: 520px; text-align: center;"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="button" id="buttonQR" value="QR生成" onclick="genarateQR()" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="divQRcode" style="margin: 20px;"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
